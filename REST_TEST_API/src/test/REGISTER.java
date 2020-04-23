@@ -19,7 +19,7 @@ import org.json.simple.JSONObject;
 public class REGISTER {
 		@GET
 		@Produces(MediaType.TEXT_HTML)
-		public JSONObject GET_HTML
+		public String GET_HTML
 		(
 			@QueryParam("EMAIL") String _email, 
 			@QueryParam("USERNAME") String _username,
@@ -36,35 +36,35 @@ public class REGISTER {
 				jo.put("RESULT_CODE",0);
 				jo.put("RESULT_MESSAGE","SHORT USERNAME");
 				jo.put("ERROR_CODE",1);
-				 return jo;
+				 return jo.toString();
 			}
 			if(!email_check(_email))
 			{
 				jo.put("RESULT_CODE",0);
 				jo.put("RESULT_MESSAGE","NOT VALID E-MAIL");
 				jo.put("ERROR_CODE",2);
-				 return jo;
+				 return jo.toString();
 			}
 			if(_password.length() < DEFAULTS.MIN_PASSWORD_LENGTH)
 			{
 				jo.put("RESULT_CODE",0);
 				jo.put("RESULT_MESSAGE","SHORT PASSWORD (min: 4 character)");
 				jo.put("ERROR_CODE",3);
-				 return jo;
+				 return jo.toString();
 			}
 			if(_password.length() > DEFAULTS.MAX_PASSWORD_LENGTH)
 			{
 				jo.put("RESULT_CODE",0);
 				jo.put("RESULT_MESSAGE","LONG PASSWORD (max: 16 character)");
 				jo.put("ERROR_CODE",4);
-				 return jo;
+				 return jo.toString();
 			}
 		    if(!password_diff_check(_password,_password2)) 
 			{
 					jo.put("RESULT_CODE",0);
 					jo.put("RESULT_MESSAGE","PASSWORDS ARE NOT SAME");
 					jo.put("ERROR_CODE",5);
-			 return jo;
+					 return jo.toString();
 			}
 
 
@@ -75,21 +75,21 @@ public class REGISTER {
 				jo.put("RESULT_CODE",-1);
 				jo.put("RESULT_MESSAGE","CONNECTION ERROR");
 				jo.put("ERROR_CODE",-1);
-				return jo;
+				 return jo.toString();
 			}
 			if( _username_and_email_check == 1)
 			{
 				jo.put("RESULT_CODE",0);
 				jo.put("RESULT_MESSAGE","USERNAME EXISTS");
 				jo.put("ERROR_CODE",6);
-				return jo;
+				 return jo.toString();
 			}
 			if( _username_and_email_check == 2)
 			{
 				jo.put("RESULT_CODE",0);
 				jo.put("RESULT_MESSAGE","EMAIL EXISTS");
 				jo.put("ERROR_CODE",7);
-				return jo;
+				 return jo.toString();
 			}
 			
 			if(_username_and_email_check == 3)
@@ -100,19 +100,19 @@ public class REGISTER {
 					jo.put("RESULT_CODE",-1);
 					jo.put("RESULT_MESSAGE","CONNECTION ERROR");
 					jo.put("ERROR_CODE",-2);
-					return jo;
+					 return jo.toString();
 				}
 				
 				jo.put("RESULT_CODE",1);
 				jo.put("RESULT_MESSAGE","SUCCESS");
 				jo.put("ERROR_CODE",0);
-				return jo;
+				 return jo.toString();
 				
 			}
 			jo.put("RESULT_CODE",-1);
 			jo.put("RESULT_MESSAGE","CONNECTION ERROR");
 			jo.put("ERROR_CODE",-3);
-			return jo;
+			 return jo.toString();
 		
 		}
 		
