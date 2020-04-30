@@ -5,6 +5,9 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.SimpleTimeZone;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -28,13 +31,25 @@ public class REGISTER {
 			@QueryParam("TYPE")  int _type
 		)
 		{
+			
+			try
+	    	{
+				SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		  		formatter.setTimeZone(new SimpleTimeZone(SimpleTimeZone.UTC_TIME, "UTC"));
+		  		String _d =formatter.format(new Date(System.currentTimeMillis()));
+		    	System.out.println("REG: " +_d + " " + _email + " " + _username + " " + _password  + " " + _password2 + " " + _type );
+
+	    	}catch(Exception e) {}
+			
+			
+			
 			JSONObject jo = new JSONObject(); 
 			
 			if(_username.length() < DEFAULTS.MIN_USERNAME_LENGTH)
 			{
 
 				jo.put("RESULT_CODE",0);
-				jo.put("RESULT_MESSAGE","SHORT USERNAME");
+				jo.put("RESULT_MESSAGE","SHORT USERNAME (min: 4 character)");
 				jo.put("ERROR_CODE",1);
 				 return jo.toString();
 			}
@@ -48,7 +63,7 @@ public class REGISTER {
 			if(_password.length() < DEFAULTS.MIN_PASSWORD_LENGTH)
 			{
 				jo.put("RESULT_CODE",0);
-				jo.put("RESULT_MESSAGE","SHORT PASSWORD (min: 4 character)");
+				jo.put("RESULT_MESSAGE","SHORT PASSWORD (min: 8 character)");
 				jo.put("ERROR_CODE",3);
 				 return jo.toString();
 			}
@@ -142,7 +157,7 @@ public class REGISTER {
 			 
 			 try{
 			      Class.forName("com.mysql.jdbc.Driver");
-			      System.out.println("Connecting to database...");
+			     // System.out.println("Connecting to database...");
 			      conn = DriverManager.getConnection(CONNECTION.DB_URL,CONNECTION.USER,CONNECTION.PASS);
 			      stmt = conn.createStatement();
 			      String sql;
@@ -205,7 +220,7 @@ public class REGISTER {
 			 
 			 try{
 			      Class.forName("com.mysql.jdbc.Driver");
-			      System.out.println("Connecting to database...");
+			     // System.out.println("Connecting to database...");
 			      conn = DriverManager.getConnection(CONNECTION.DB_URL,CONNECTION.USER,CONNECTION.PASS);
 			      stmt = conn.createStatement();     
 			      // note that i'm leaving "date_created" out of this insert statement

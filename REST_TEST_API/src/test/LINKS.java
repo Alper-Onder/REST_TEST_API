@@ -6,6 +6,12 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.SimpleTimeZone;
+import java.util.TimeZone;
+
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -22,8 +28,17 @@ public class LINKS
 	@Produces(MediaType.TEXT_HTML)
 	public String GET_HTML(@QueryParam("R") String f_link)
 	{
+		try
+    	{
+			SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	  		formatter.setTimeZone(new SimpleTimeZone(SimpleTimeZone.UTC_TIME, "UTC"));
+	  		String _d =formatter.format(new Date(System.currentTimeMillis()));
+	    	System.out.println("link: " +_d + " " + f_link);
+	}catch(Exception e) {}
+		
+		
 		String _To = GET_LINK(f_link);
-		System.out.println("*** " + _To);
+		//System.out.println("*** " + _To);
 		String resource;
 		if(!_To.equals("NONE"))
 		{
@@ -42,7 +57,8 @@ public class LINKS
 		{
 			 resource = EXPIRE_LINK(f_link)?"LINK IS REMOVED":"NOT VALID LINK";
 		}
-				
+	
+		
 		return resource;
 	}
 
@@ -52,26 +68,48 @@ public class LINKS
 		 Connection conn = null;
 		 Statement stmt = null;
 		 String _val = "NONE";
+		 int _link_id = 0;
 		 try{
 		      //STEP 2: Register JDBC driver
 		      Class.forName("com.mysql.jdbc.Driver");
 
 		      //STEP 3: Open a connection
-		      System.out.println("Connecting to database...");
+		      //System.out.println("Connecting to database...");
 		      conn = DriverManager.getConnection(CONNECTION.DB_URL,CONNECTION.USER,CONNECTION.PASS);
 
 		      //STEP 4: Execute a query
 		      stmt = conn.createStatement();
 		      String sql;
-		      sql = "SELECT TO_LINK FROM LINKS WHERE FROM_LINK='"+F_LINK+"'";
+		      //System.out.println(1);
+		      sql = "SELECT ID, TO_LINK FROM LINKS WHERE FROM_LINK='"+F_LINK+"'";
 		      ResultSet rs = stmt.executeQuery(sql);
 		      if(rs.next()==true)
+		      {
 		    	  _val = rs.getString("TO_LINK");
-		      
-		     
-		      //STEP 6: Clean-up environment
+		    	  _link_id = rs.getInt("ID");
+		      }
+		    	 
 		      rs.close();
 		      stmt.close();
+
+		      if(_link_id > 0 )
+		      {
+		    	  stmt = conn.createStatement();
+		    	  
+		  		SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		  		formatter.setTimeZone(new SimpleTimeZone(SimpleTimeZone.UTC_TIME, "UTC"));
+		  		String _d =formatter.format(new Date(System.currentTimeMillis()));
+		  		 stmt.executeUpdate("INSERT INTO LINK_ANALYTICS (LINK_ID, DATE) "
+				          +"VALUES ("+_link_id+", '"+_d+"')");
+		  		 stmt.close();
+		      }
+		     
+		      
+		      
+		    
+		      
+		      
+		    
 		      conn.close();
 		   }catch(SQLException se){
 		      //Handle errors for JDBC
@@ -93,7 +131,7 @@ public class LINKS
 		         se.printStackTrace();
 		      }//end finally try
 		   }//end try
-		   System.out.println("Goodbye!");
+		 //  System.out.println("Goodbye!");
 		   return _val;
 	}
 	
@@ -107,7 +145,7 @@ public class LINKS
 		      Class.forName("com.mysql.jdbc.Driver");
 
 		      //STEP 3: Open a connection
-		      System.out.println("Connecting to database...");
+		    //  System.out.println("Connecting to database...");
 		      conn = DriverManager.getConnection(CONNECTION.DB_URL,CONNECTION.USER,CONNECTION.PASS);
 
 		      String sql;

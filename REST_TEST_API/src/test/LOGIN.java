@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -13,6 +14,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.json.simple.JSONObject;
+
+import java.util.Date;
+import java.util.SimpleTimeZone;
 import java.util.UUID; 
 
 //http://localhost:8080/REST_TEST_API/rest/login?ID=prodian&PS=prodian1
@@ -27,6 +31,17 @@ public class LOGIN {
 		@QueryParam("PS") String _password
 	)
 	{
+		
+		try
+    	{
+			SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	  		formatter.setTimeZone(new SimpleTimeZone(SimpleTimeZone.UTC_TIME, "UTC"));
+	  		String _d =formatter.format(new Date(System.currentTimeMillis()));
+	    	System.out.println("login: " +_d + " " + _id + " " + _password );
+
+    	}catch(Exception e) {}
+		
+		
 		JSONObject jo = new JSONObject(); 
 		int _login_result = DB_LOGIN(_id,_password);
 		
@@ -64,9 +79,9 @@ public class LOGIN {
 	private String UNIQUE_SESSION_ID_CREATOR()
 	{
 		String _ID = UUID.randomUUID().toString(); 
-		System.out.println("UUID1: " + _ID);
+		//System.out.println("UUID1: " + _ID);
 		_ID.replaceAll("-","");
-		System.out.println("UUID2: " + _ID);
+		//System.out.println("UUID2: " + _ID);
 		return ENC.ENCRYPT(_ID.substring(0,15))+""+ENC.ENCRYPT(_ID.substring(16));
 	}
 
@@ -163,7 +178,7 @@ public class LOGIN {
 		 
 		 try{
 		      Class.forName("com.mysql.jdbc.Driver");
-		      System.out.println("Connecting to database...");
+		      //System.out.println("Connecting to database...");
 		      conn = DriverManager.getConnection(CONNECTION.DB_URL,CONNECTION.USER,CONNECTION.PASS);
 		      stmt = conn.createStatement();
 		      String sql;

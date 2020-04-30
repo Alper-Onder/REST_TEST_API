@@ -10,6 +10,7 @@ import java.sql.Statement;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.SimpleTimeZone;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -32,6 +33,15 @@ public class ALLL {
 	@Produces(MediaType.TEXT_HTML)
 	public String GET_ALL_LINKS(@QueryParam("S") String _ses)
 	{
+    	try
+    	{
+    		
+    	SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+  		formatter.setTimeZone(new SimpleTimeZone(SimpleTimeZone.UTC_TIME, "UTC"));
+  		String _d =formatter.format(new Date(System.currentTimeMillis()));
+    	 System.out.println("ALLLS: " +_d+  " " + _ses);
+    	}catch(Exception e) {}
+    	
     	 JSONArray ja =  GET_ALL_LINKS_FDB( _ses);
     	 JSONObject jo_of_ja = new JSONObject();
     	 jo_of_ja.put("ALL_LINKS",ja);
@@ -60,11 +70,12 @@ public class ALLL {
 		    	  _user_id = rs.getInt("USER_ID");
 			   }
 		      
-		      sql = "SELECT FROM_LINK, TO_LINK, EXPIRE_LINK FROM LINKS WHERE OWNER_ID="+_user_id+"";
+		      sql = "SELECT ID,FROM_LINK, TO_LINK, EXPIRE_LINK FROM LINKS WHERE OWNER_ID="+_user_id+"";
 		      rs = stmt.executeQuery(sql);
 		      while(rs.next())
 		      {
 		    	  JSONObject _jo = new JSONObject();
+		    	  _jo.put("LID",rs.getInt("ID"));
 		    	  _jo.put("SHORT_LINK",rs.getString("FROM_LINK"));
 		    	  _jo.put("LINK",rs.getString("TO_LINK"));
 		    	  _jo.put("EXPIRE_LINK",rs.getString("EXPIRE_LINK"));

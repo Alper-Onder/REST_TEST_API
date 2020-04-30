@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -13,6 +14,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.json.simple.JSONObject;
+
+import java.util.Date;
+import java.util.SimpleTimeZone;
 import java.util.UUID; 
 
 @Path("/sl")
@@ -27,6 +31,16 @@ public class LOGIN_VIA_SESSION {
 	)
 	{
 		
+		try
+    	{
+			SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	  		formatter.setTimeZone(new SimpleTimeZone(SimpleTimeZone.UTC_TIME, "UTC"));
+	  		String _d =formatter.format(new Date(System.currentTimeMillis()));
+	    	System.out.println("sl: " +_d + " " + _ses);
+
+    	}catch(Exception e) {}
+		
+		
 		 JSONObject jo = CHECK_SESSION_LOGIN(_ses);
 		
 		return jo.toString();
@@ -38,14 +52,14 @@ public class LOGIN_VIA_SESSION {
 		 Statement stmt = null;
 		 String _USER_NAME = "";
 		 JSONObject jo = new JSONObject();
-		 
+		 boolean _connect = false;
 		 try{
 		      Class.forName("com.mysql.jdbc.Driver");
 		      conn = DriverManager.getConnection(CONNECTION.DB_URL,CONNECTION.USER,CONNECTION.PASS);
 		      stmt = conn.createStatement();
 		      String sql;
 		    
-		     sql = "SELECT USERS.ID, USERS.USERNAME, SESSIONS.SESSION_KEY FROM SESSIONS LEFT JOIN USERS ON SESSIONS.USER_ID = USERS.ID WHERE SESSIONS.SESSION_KEY = '"+_ses+"'";
+		      sql = "SELECT USERS.ID, USERS.USERNAME, SESSIONS.SESSION_KEY FROM SESSIONS LEFT JOIN USERS ON SESSIONS.USER_ID = USERS.ID WHERE SESSIONS.SESSION_KEY = '"+_ses+"'";
 		      /*
 		      sql = "SELECT USERS.ID, SESSIONS.SESSION_KEY"+
 		      " FROM SESSIONS LEFT JOIN USERS"+
@@ -61,7 +75,8 @@ public class LOGIN_VIA_SESSION {
 		    	 _USER_NAME = rs.getString("USERNAME");
 		      }
 		    
-		      System.out.println("UN: " +  _USER_NAME);
+		      _connect =  true;
+		     // System.out.println("UN: " +  _USER_NAME);
 		      rs.close();
 		      stmt.close();
 		      conn.close();
@@ -85,7 +100,7 @@ public class LOGIN_VIA_SESSION {
 		         se.printStackTrace();
 		      }//end finally try
 		   }//end try
-		 jo.put("LOGIN_RESULT",_USER_NAME.equals("")?0:1);
+		 jo.put("LOGIN_RESULT",!_connect?-1:_USER_NAME.equals("")?0:1);
 		 jo.put("USERNAME",_USER_NAME);
 		 return jo;
 	}
