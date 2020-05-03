@@ -1,6 +1,7 @@
 package test;
 
 import java.util.List;
+import java.util.Map;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
@@ -10,6 +11,7 @@ import java.sql.Statement;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 import javax.json.Json;
@@ -109,51 +111,81 @@ public class GALA {
 		    	  int _total_click_count_of_all_links = 0;
 		    	  int _total_click_count_of_the_link = 0;
 		    	  
-		    	  LinkedList<Integer> _link_ids = new LinkedList<Integer>();
 		    	  
+		    	  Map<Integer, GALA_MAP> _gala_map = new HashMap<Integer,GALA_MAP>();
+		 
+		    	   	  
 		    	  sql = "SELECT ID FROM LINKS WHERE OWNER_ID ='"+_user_id+"'";
 			      rs = stmt.executeQuery(sql);
 		    	  while(rs.next()==true)
 		    	  {
-		    		  _link_ids.add(rs.getInt("ID"));
+		    		 _gala_map.put(rs.getInt("ID"),new GALA_MAP());
 		    	  }
-			      /*
 		    	  
-			      sql = "SELECT OWNER_ID FROM LINKS WHERE ID ='"+_ilid+"'";
-			      rs = stmt.executeQuery(sql);
-			      
-			      if(rs.next()==true)
-			      {
-			    	 if(_user_id == rs.getInt("OWNER_ID"))
-			    	 {
-			    		 _owner_check = true;
-			    	 } 
-			    	 else
-			    	 {
-			    		 _jo_result.put("RESULT",3); // INCORRECT USER FOR LINK
-			    	 }
-				  }
+		    	  int _key_id  = 0;
+		    	  for(int i = 0; i<_gala_map.size(); i++)
+		    	  {
+		    		  _key_id =  (int)_gala_map.keySet().toArray()[i];
+		    		  System.out.println("SET K: " + _key_id);
+		    		  sql = "SELECT DATE FROM LINK_ANALYTICS WHERE LINK_ID='"+_key_id+"'";
+		    		  rs = stmt.executeQuery(sql);
+		    		  
+		    		  while(rs.next()==true)
+			    	  {
+			    		 _gala_map.get(_key_id).LIST.add(rs.getString("DATE"));
+			    	  }
+		    	  }
+		    	  
+		    	  JSONObject _temp_jo = new JSONObject();
+		    	  JSONObject _temp_jo_link = new JSONObject();
+		    	  JSONArray _temp_ja = new JSONArray();
+		    	  
+		    	  
+		    	  for(int i = 0; i<_gala_map.size(); i++)
+		    	  {
+		    		  _key_id =  (int)_gala_map.keySet().toArray()[i];
+		    		  System.out.println("GET K: " + _key_id);
 
-			      if(_owner_check)
-				  {	  
-			    	  int _total_count = 0;
-				      JSONObject _jo = new JSONObject();
-			    	  sql = "SELECT LINK_ID, DATE FROM LINK_ANALYTICS WHERE LINK_ID="+_ilid+"";
-				      rs = stmt.executeQuery(sql);
-				      
-				      while(rs.next())
-				      {
-				    	  _total_count++;
-				    	  _jo = new JSONObject();
-				    	  _jo.put("CLICK_DATE", rs.getString("DATE"));
-				    	  _ja.add(_jo);
-				    	 
-				      }
-				      _jo_result.put("TOTAL_CLICK_COUNT",_total_count);
-				      _jo_result.put("CLICK_DATES",_ja);
-				      _jo_result.put("RESULT",1);
-				  }
-			      */
+		    		  _total_click_count_of_the_link = 0;
+		    		  _temp_ja = new JSONArray();
+		    		  for(int k = 0; k<_gala_map.get(_key_id).LIST.size(); k++)
+		    		  { 
+		    			  _total_click_count_of_all_links++;
+		    			  _total_click_count_of_the_link++;
+		    			  System.out.println("GET D: " + _gala_map.get(_key_id).LIST.get(k));
+		    			  _temp_jo = new JSONObject();
+		    			  _temp_jo.put("CLICK_DATE",_gala_map.get(_key_id).LIST.get(k));
+		    			  _temp_ja.add(_temp_jo);
+		    		  }
+		    		  
+		    		  _temp_jo_link = new JSONObject();
+		    		  _temp_jo_link.put("TOTAL_CLICK_COUNT", _total_click_count_of_the_link);
+		    		  _temp_jo_link.put("ID", _key_id);
+		    		  _temp_jo_link.put("CLICK_DATES", _temp_ja);
+		    		  
+		    		  _ja.add(_temp_jo_link);
+		    	  }
+		    	  
+		    	 _jo_result.put("RESULT",1);
+		    	 _jo_result.put("TOTAL_CLICK_COUNT",_total_click_count_of_all_links);
+		    	 _jo_result.put("LINKS",_ja);	    	
+		    	  
+		    	  
+		    	 
+		    	  /*
+		    	   *  int _total_click_count_of_all_links = 0;
+		    	  int _total_click_count_of_the_link = 0;
+		    	  
+		    	   ****JO*****
+		    	    TOTAL_CLICK_COUNT:
+		    	  	LINKS: ***JA****
+		    	  			ID:
+		    	  			TOTAL_CLICK_COUNT
+		    	  			CLICK_DATES: **** JA *****
+		    	  				CLICK_DATE
+		    	  				CLICK_DATA
+		    	  				....
+		    	   */
 		      }
 		      
 			  rs.close();
@@ -179,6 +211,33 @@ public class GALA {
 		         se.printStackTrace();
 		      }//end finally try
 		   }//end try
+		 
+		 if(_jo_result.isEmpty())
+			 _jo_result.put("RESULT",0);
 		 return  _jo_result;
 		 }
 }
+
+class GALA_MAP
+{
+	public LinkedList<String> LIST;
+	
+	public GALA_MAP()
+	{
+		LIST = new LinkedList<String>();
+	}
+	
+	
+}
+/*
+ * TOTAL_CLICK_COUNT:
+		LINKS:
+			ID:
+			TOTAL_CLICK_COUNT
+			CLICK_DATES:
+				CLICK_DATE
+				CLICK_DATA
+				....
+ */
+
+
