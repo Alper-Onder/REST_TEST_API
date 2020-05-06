@@ -7,7 +7,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 
+import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -23,15 +26,33 @@ import java.util.UUID;
 @Path("/login")
 public class LOGIN {
 
-	@GET
+	
+	@POST
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.TEXT_HTML)
 	public String LOGIN_FUNC
 	(
-		@QueryParam("ID") String _id,
-		@QueryParam("PS") String _password
+			@FormParam("ID") String _id, 
+			@FormParam("PS") String _password
 	)
+	{	
+		return LOGIN_FNC(_id,_password);
+	}
+	
+	@GET
+	@Path("/G")
+	@Produces(MediaType.TEXT_HTML)
+	public String LOGIN_FUNC_2
+	(
+			@QueryParam("ID") String _id, 
+			@QueryParam("PS") String _password
+	)
+	{	
+		return LOGIN_FNC(_id,_password);
+	}
+	
+	private String LOGIN_FNC(String _id, String _password)
 	{
-		
 		try
     	{
 			SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

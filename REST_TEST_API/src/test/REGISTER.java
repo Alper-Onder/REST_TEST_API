@@ -9,7 +9,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.SimpleTimeZone;
 
+import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -20,6 +23,9 @@ import org.json.simple.JSONObject;
 @Path("/REG")
 // /REG?EMAIL=email&USERNAME=username&PASSWORD=password&REPASSWORD=repassword&TYPE=type
 public class REGISTER {
+	
+	
+	/*
 		@GET
 		@Produces(MediaType.TEXT_HTML)
 		public String GET_HTML
@@ -29,107 +35,142 @@ public class REGISTER {
 			@QueryParam("PASSWORD") String _password, 
 			@QueryParam("REPASSWORD") String _password2,
 			@QueryParam("TYPE")  int _type
-		)
+		)*/
+	
+	@POST
+	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED})
+	@Produces(MediaType.TEXT_HTML)
+	public String POST_HTML
+	(
+			@FormParam("EMAIL") String _email, 
+			@FormParam("USERNAME") String _username,
+			@FormParam("PASSWORD") String _password, 
+			@FormParam("REPASSWORD") String _password2,
+			@FormParam("TYPE")  int _type
+	)
 		{
 			
-			try
-	    	{
-				SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		  		formatter.setTimeZone(new SimpleTimeZone(SimpleTimeZone.UTC_TIME, "UTC"));
-		  		String _d =formatter.format(new Date(System.currentTimeMillis()));
-		    	System.out.println("REG: " +_d + " " + _email + " " + _username + " " + _password  + " " + _password2 + " " + _type );
+		 return REG_FUNC(_email,_username,_password,_password2,_type);
+		}
+	
+	
+	@GET
+	@Path("/G")
+	@Produces(MediaType.TEXT_HTML)
+	public String POST_HTML_2
+	(
+			@QueryParam("EMAIL") String _email, 
+			@QueryParam("USERNAME") String _username,
+			@QueryParam("PASSWORD") String _password, 
+			@QueryParam("REPASSWORD") String _password2,
+			@QueryParam("TYPE")  int _type
+	)
+		{
+			
+		 return REG_FUNC(_email,_username,_password,_password2,_type);
+		}
+	
+	
+	
+	public String REG_FUNC(String _email, String _username, String _password, String _password2, int _type)
+	{
 
-	    	}catch(Exception e) {}
-			
-			
-			
-			JSONObject jo = new JSONObject(); 
-			
-			if(_username.length() < DEFAULTS.MIN_USERNAME_LENGTH)
-			{
+		try
+    	{
+			SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	  		formatter.setTimeZone(new SimpleTimeZone(SimpleTimeZone.UTC_TIME, "UTC"));
+	  		String _d =formatter.format(new Date(System.currentTimeMillis()));
+	    	System.out.println("REG: " +_d + " " + _email + " " + _username + " " + _password  + " " + _password2 + " " + _type );
 
-				jo.put("RESULT_CODE",0);
-				jo.put("RESULT_MESSAGE","SHORT USERNAME (min: 4 character)");
-				jo.put("ERROR_CODE",1);
-				 return jo.toString();
-			}
-			if(!email_check(_email))
-			{
-				jo.put("RESULT_CODE",0);
-				jo.put("RESULT_MESSAGE","NOT VALID E-MAIL");
-				jo.put("ERROR_CODE",2);
-				 return jo.toString();
-			}
-			if(_password.length() < DEFAULTS.MIN_PASSWORD_LENGTH)
-			{
-				jo.put("RESULT_CODE",0);
-				jo.put("RESULT_MESSAGE","SHORT PASSWORD (min: 8 character)");
-				jo.put("ERROR_CODE",3);
-				 return jo.toString();
-			}
-			if(_password.length() > DEFAULTS.MAX_PASSWORD_LENGTH)
-			{
-				jo.put("RESULT_CODE",0);
-				jo.put("RESULT_MESSAGE","LONG PASSWORD (max: 16 character)");
-				jo.put("ERROR_CODE",4);
-				 return jo.toString();
-			}
-		    if(!password_diff_check(_password,_password2)) 
-			{
-					jo.put("RESULT_CODE",0);
-					jo.put("RESULT_MESSAGE","PASSWORDS ARE NOT SAME");
-					jo.put("ERROR_CODE",5);
-					 return jo.toString();
-			}
+    	}catch(Exception e) {}
+		
+		
+		
+		JSONObject jo = new JSONObject(); 
+		
+		if(_username.length() < DEFAULTS.MIN_USERNAME_LENGTH)
+		{
 
-
-			int _username_and_email_check = CHECK_USERNAME_AND_EMAIL(_username,_email);
-			
-			if( _username_and_email_check == 0)
+			jo.put("RESULT_CODE",0);
+			jo.put("RESULT_MESSAGE","SHORT USERNAME (min: 4 character)");
+			jo.put("ERROR_CODE",1);
+			 return jo.toString();
+		}
+		if(!email_check(_email))
+		{
+			jo.put("RESULT_CODE",0);
+			jo.put("RESULT_MESSAGE","NOT VALID E-MAIL");
+			jo.put("ERROR_CODE",2);
+			 return jo.toString();
+		}
+		if(_password.length() < DEFAULTS.MIN_PASSWORD_LENGTH)
+		{
+			jo.put("RESULT_CODE",0);
+			jo.put("RESULT_MESSAGE","SHORT PASSWORD (min: 8 character)");
+			jo.put("ERROR_CODE",3);
+			 return jo.toString();
+		}
+		if(_password.length() > DEFAULTS.MAX_PASSWORD_LENGTH)
+		{
+			jo.put("RESULT_CODE",0);
+			jo.put("RESULT_MESSAGE","LONG PASSWORD (max: 16 character)");
+			jo.put("ERROR_CODE",4);
+			 return jo.toString();
+		}
+	    if(!password_diff_check(_password,_password2)) 
+		{
+				jo.put("RESULT_CODE",0);
+				jo.put("RESULT_MESSAGE","PASSWORDS ARE NOT SAME");
+				jo.put("ERROR_CODE",5);
+				 return jo.toString();
+		}
+	    
+		int _username_and_email_check = CHECK_USERNAME_AND_EMAIL(_username,_email);
+		
+		if( _username_and_email_check == 0)
+		{
+			jo.put("RESULT_CODE",-1);
+			jo.put("RESULT_MESSAGE","CONNECTION ERROR");
+			jo.put("ERROR_CODE",-1);
+			 return jo.toString();
+		}
+		if( _username_and_email_check == 1)
+		{
+			jo.put("RESULT_CODE",0);
+			jo.put("RESULT_MESSAGE","USERNAME EXISTS");
+			jo.put("ERROR_CODE",6);
+			 return jo.toString();
+		}
+		if( _username_and_email_check == 2)
+		{
+			jo.put("RESULT_CODE",0);
+			jo.put("RESULT_MESSAGE","EMAIL EXISTS");
+			jo.put("ERROR_CODE",7);
+			 return jo.toString();
+		}
+		
+		if(_username_and_email_check == 3)
+		{
+			boolean _result =  REGISTER_USER(_username,_email,_password,_type);
+			if(!_result)
 			{
 				jo.put("RESULT_CODE",-1);
 				jo.put("RESULT_MESSAGE","CONNECTION ERROR");
-				jo.put("ERROR_CODE",-1);
-				 return jo.toString();
-			}
-			if( _username_and_email_check == 1)
-			{
-				jo.put("RESULT_CODE",0);
-				jo.put("RESULT_MESSAGE","USERNAME EXISTS");
-				jo.put("ERROR_CODE",6);
-				 return jo.toString();
-			}
-			if( _username_and_email_check == 2)
-			{
-				jo.put("RESULT_CODE",0);
-				jo.put("RESULT_MESSAGE","EMAIL EXISTS");
-				jo.put("ERROR_CODE",7);
+				jo.put("ERROR_CODE",-2);
 				 return jo.toString();
 			}
 			
-			if(_username_and_email_check == 3)
-			{
-				boolean _result =  REGISTER_USER(_username,_email,_password,_type);
-				if(!_result)
-				{
-					jo.put("RESULT_CODE",-1);
-					jo.put("RESULT_MESSAGE","CONNECTION ERROR");
-					jo.put("ERROR_CODE",-2);
-					 return jo.toString();
-				}
-				
-				jo.put("RESULT_CODE",1);
-				jo.put("RESULT_MESSAGE","SUCCESS");
-				jo.put("ERROR_CODE",0);
-				 return jo.toString();
-				
-			}
-			jo.put("RESULT_CODE",-1);
-			jo.put("RESULT_MESSAGE","CONNECTION ERROR");
-			jo.put("ERROR_CODE",-3);
+			jo.put("RESULT_CODE",1);
+			jo.put("RESULT_MESSAGE","SUCCESS");
+			jo.put("ERROR_CODE",0);
 			 return jo.toString();
-		
+			
 		}
+		jo.put("RESULT_CODE",-1);
+		jo.put("RESULT_MESSAGE","CONNECTION ERROR");
+		jo.put("ERROR_CODE",-3);
+		 return jo.toString();
+	}
 		
 		private boolean password_diff_check(String _p1, String _p2)
 		{

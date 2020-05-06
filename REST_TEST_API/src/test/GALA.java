@@ -16,8 +16,11 @@ import java.util.LinkedList;
 
 import javax.json.Json;
 import javax.json.JsonArray;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -27,50 +30,31 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 
-
 @Path("/GALA")
 public class GALA {
 	 
-	/*
-	 	http://localhost:8080/REST_TEST_API/rest/GALA?S=SessionKey
-
-		Real Example:
-		http://localhost:8080/REST_TEST_API/rest/GALA?S=ab0f09c79a9bd10442b3af26d0bdaaed47ecaee66d58fc4ce8d9c91ab3eab9297ba2e0d766fd0654f15820b55a251d3ee56fda3091b46e578fcc6ebbb96fb1a
-		
-		RESULTS FOR ALL LINK ANALYTICS
-		Result of the register operation is a JSON String with an array named LINKS and a property  named RESULT.
-		
-		The array LINKS has 3 key  ID, TOTAL_CLICK_COUNT and an array CLICK_DATES.
-		
-		The array CLICK_DATES has 1 key CLICK_DATE
-		CLICK_DATE gives the date for UTC in “yyyy-MM-dd HH:mm:ss”
-		CLICK_DATES containsall dates to create a graphic. 
-		
-		MEANING OF RESULT CODES:
-		0 : Connection error.
-		1: Successful.
-		
-		MEANING OF OTHER KEY CODES:
-		TOTAL_CLICK_COUNT: total click count of the link.
-		ID: id of the link can be comparable with ALL LINKS results.
-		ORIGINAL_LINK: the original link of the shortened link.
-		
-		
-		
-		RESULT
-		TOTAL_CLICK_COUNT:
-		LINKS:
-			ID:
-			TOTAL_CLICK_COUNT
-			CLICK_DATES:
-				CLICK_DATE
-				CLICK_DATA
-				....
-	 */
-	 
-    @GET
+	@POST
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.TEXT_HTML)
-	public String GET_ALL_ANALYTICS(@QueryParam("S") String _ses)
+	public String GET_ALL_ANALYTICS
+	(
+			@FormParam("S") String _ses
+	)
+	
+	{
+    	JSONObject jo = new JSONObject();
+    	jo =  GET_LINK_ANALYTICS_FROM_DB(_ses);
+    	
+		return jo.toString();
+	}
+	
+	@GET
+	@Path("/G")
+	@Produces(MediaType.TEXT_HTML)
+	public String GET_ALL_ANALYTICSS
+	(
+			@QueryParam("S") String _ses
+	)
 	{
     	JSONObject jo = new JSONObject();
     	jo =  GET_LINK_ANALYTICS_FROM_DB(_ses);
@@ -140,7 +124,7 @@ public class GALA {
 		    	  JSONObject _temp_jo_link = new JSONObject();
 		    	  JSONArray _temp_ja = new JSONArray();
 		    	  
-		    	  
+			      String _last_access = "";
 		    	  for(int i = 0; i<_gala_map.size(); i++)
 		    	  {
 		    		  _key_id =  (int)_gala_map.keySet().toArray()[i];
@@ -148,13 +132,15 @@ public class GALA {
 
 		    		  _total_click_count_of_the_link = 0;
 		    		  _temp_ja = new JSONArray();
+		    		  _last_access = "";
 		    		  for(int k = 0; k<_gala_map.get(_key_id).LIST.size(); k++)
 		    		  { 
 		    			  _total_click_count_of_all_links++;
 		    			  _total_click_count_of_the_link++;
 		    			  System.out.println("GET D: " + _gala_map.get(_key_id).LIST.get(k));
 		    			  _temp_jo = new JSONObject();
-		    			  _temp_jo.put("CLICK_DATE",_gala_map.get(_key_id).LIST.get(k));
+				    	  _last_access = _gala_map.get(_key_id).LIST.get(k);
+		    			  _temp_jo.put("CLICK_DATE",_last_access);
 		    			  _temp_ja.add(_temp_jo);
 		    		  }
 		    		  
@@ -162,6 +148,7 @@ public class GALA {
 		    		  _temp_jo_link.put("TOTAL_CLICK_COUNT", _total_click_count_of_the_link);
 		    		  _temp_jo_link.put("ID", _key_id);
 		    		  _temp_jo_link.put("CLICK_DATES", _temp_ja);
+		    		  _temp_jo_link.put("LAST_ACCESS",_last_access);
 		    		  
 		    		  _ja.add(_temp_jo_link);
 		    	  }

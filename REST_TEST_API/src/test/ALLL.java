@@ -14,8 +14,11 @@ import java.util.SimpleTimeZone;
 
 import javax.json.Json;
 import javax.json.JsonArray;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -29,10 +32,30 @@ import org.json.simple.JSONObject;
 @Path("/ALLLS")
 public class ALLL {
 	 
-    @GET
+	
+    @POST
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.TEXT_HTML)
-	public String GET_ALL_LINKS(@QueryParam("S") String _ses)
+	public String GET_ALL_LINKS(@FormParam("S") String _ses)
 	{
+    	return GET_ALL_LINKS_FUNC(_ses);
+	}
+    
+    
+    
+    @GET
+    @Path("/G")
+	@Produces(MediaType.TEXT_HTML)
+	public String GET_ALL_LINKS_2(@QueryParam("S") String _ses)
+	{
+    	return GET_ALL_LINKS_FUNC(_ses);
+	}
+    
+    
+
+    public String GET_ALL_LINKS_FUNC(String _ses)
+    {
+
     	try
     	{
     		
@@ -46,7 +69,7 @@ public class ALLL {
     	 JSONObject jo_of_ja = new JSONObject();
     	 jo_of_ja.put("ALL_LINKS",ja);
 		return jo_of_ja.toString();
-	}
+    }
 
 	private JSONArray GET_ALL_LINKS_FDB(String _ses)
 	{
@@ -70,15 +93,20 @@ public class ALLL {
 		    	  _user_id = rs.getInt("USER_ID");
 			   }
 		      
-		      sql = "SELECT ID,FROM_LINK, TO_LINK, EXPIRE_LINK FROM LINKS WHERE OWNER_ID="+_user_id+"";
+		      sql = "SELECT ID,FROM_LINK, TO_LINK,CR_DATE,IS_ACTIVE, EXPIRE_LINK,EXPIRE_DATE,LINK_LABEL FROM LINKS WHERE OWNER_ID="+_user_id+"";
 		      rs = stmt.executeQuery(sql);
 		      while(rs.next())
 		      {
 		    	  JSONObject _jo = new JSONObject();
-		    	  _jo.put("LID",rs.getInt("ID"));
+		    	  _jo.put("LID",rs.getInt("ID")); 
 		    	  _jo.put("SHORT_LINK",rs.getString("FROM_LINK"));
 		    	  _jo.put("LINK",rs.getString("TO_LINK"));
 		    	  _jo.put("EXPIRE_LINK",rs.getString("EXPIRE_LINK"));
+		    	  _jo.put("CREATION_DATE",rs.getString("CR_DATE"));
+		    	  _jo.put("IS_ACTIVE",rs.getInt("IS_ACTIVE"));
+		    	  
+		    	  _jo.put("EXPIRE_DATE",rs.getString("EXPIRE_DATE"));
+		    	  _jo.put("LABEL",rs.getString("LINK_LABEL"));
 		    	  _ja.add(_jo);
 		      }
 			  rs.close();

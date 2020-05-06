@@ -16,17 +16,19 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
 
-@Path("/link")
+@Path("/R")
 public class LINKS
 {
 	@GET
+	@Path("{link}")
 	@Produces(MediaType.TEXT_HTML)
-	public String GET_HTML(@QueryParam("R") String f_link)
+	public String GET_HTML(@PathParam("link") String f_link)
 	{
 		try
     	{
@@ -34,7 +36,7 @@ public class LINKS
 	  		formatter.setTimeZone(new SimpleTimeZone(SimpleTimeZone.UTC_TIME, "UTC"));
 	  		String _d =formatter.format(new Date(System.currentTimeMillis()));
 	    	System.out.println("link: " +_d + " " + f_link);
-	}catch(Exception e) {}
+	     }catch(Exception e) {}
 		
 		
 		String _To = GET_LINK(f_link);
@@ -69,6 +71,7 @@ public class LINKS
 		 Statement stmt = null;
 		 String _val = "NONE";
 		 int _link_id = 0;
+		 int is_active = 0;
 		 try{
 		      //STEP 2: Register JDBC driver
 		      Class.forName("com.mysql.jdbc.Driver");
@@ -81,16 +84,20 @@ public class LINKS
 		      stmt = conn.createStatement();
 		      String sql;
 		      //System.out.println(1);
-		      sql = "SELECT ID, TO_LINK FROM LINKS WHERE FROM_LINK='"+F_LINK+"'";
+		      sql = "SELECT ID, TO_LINK, IS_ACTIVE FROM LINKS WHERE FROM_LINK='"+F_LINK+"'";
 		      ResultSet rs = stmt.executeQuery(sql);
 		      if(rs.next()==true)
 		      {
-		    	  _val = rs.getString("TO_LINK");
+		    	  is_active = rs.getInt("IS_ACTIVE");
+		    	  if(is_active == 1)
+		    	  {  _val = rs.getString("TO_LINK");
 		    	  _link_id = rs.getInt("ID");
+		    	  }
+		    	
+		    	  
 		      }
 		    	 
-		      rs.close();
-		      stmt.close();
+
 
 		      if(_link_id > 0 )
 		      {
@@ -103,13 +110,8 @@ public class LINKS
 				          +"VALUES ("+_link_id+", '"+_d+"')");
 		  		 stmt.close();
 		      }
-		     
-		      
-		      
-		    
-		      
-		      
-		    
+		      rs.close();
+		      stmt.close();
 		      conn.close();
 		   }catch(SQLException se){
 		      //Handle errors for JDBC
@@ -149,12 +151,17 @@ public class LINKS
 		      conn = DriverManager.getConnection(CONNECTION.DB_URL,CONNECTION.USER,CONNECTION.PASS);
 
 		      String sql;
-		      sql = "DELETE from LINKS where EXPIRE_LINK = '"+E_LINK+"'";
+		      sql = "UPDATE IS_ACTIVE from LINKS where EXPIRE_LINK = '"+E_LINK+"'";
 		      PreparedStatement preparedStmt = conn.prepareStatement(sql);
-		      preparedStmt.execute();
+		    
+		      
+		      int _count  = preparedStmt.executeUpdate();
+		     
 		      preparedStmt.close();
 		      conn.close();
-		      return true;
+		      if(_count>0)
+		    	  return true;
+		      return false;
 		   }catch(SQLException se){
 		      //Handle errors for JDBC
 		      se.printStackTrace();

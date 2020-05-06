@@ -14,8 +14,11 @@ import java.util.SimpleTimeZone;
 
 import javax.json.Json;
 import javax.json.JsonArray;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -28,33 +31,39 @@ import org.json.simple.JSONObject;
 
 @Path("/GLA")
 public class GLA {
-	 
-	/*
-	 	Example Usage:  
-	 	
-		Basic Example:
-		http://localhost:8080/REST_TEST_API/rest/GLA?ID=idOfTheLink&S=SessionKey
-		
-		Real Example:
-		http://localhost:8080/REST_TEST_API/rest/GLA?ID=135&S=ab0f09c79a9bd10442b3af26d0bdaaed47ecaee66d58fc4ce8d9c91ab3eab9297ba2e0d766fd0654f15820b55a251d3ee56fda3091b46e578fcc6ebbb96fb1a
-		
-		RESULTS FOR LINK ANALYTICS
-		Result of the register operation is a JSON String with an array named CLICK_DATES and a properties  named RESULT and TOTAL_CLICK_COUNT;
-		The array CLICK_DATES has 1 key CLICK_DATE
-		CLICK_DATE gives the date for UTC in “yyyy-MM-dd HH:mm:ss”
-		CLICK_DATES containsall dates to create a graphic. 
-		MEANING OF RESULT CODES:
-		0 : Connection error.
-		1: Successful.
-		
-		MEANING OF OTHER KEY CODES:
-		TOTAL_CLICK_COUNT: total click count of the link.
 
-	 */
-	 
-    @GET
+
+	
+	@POST
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.TEXT_HTML)
-	public String GET_ALL_ANALYTICS(@QueryParam("LID")String _lid,@QueryParam("S") String _ses)
+	public String GLA_POST
+	(
+			@FormParam("LID") String _lid, 
+			@FormParam("S") String _ses
+	)
+	{
+		return  GET_ALL_ANALYTICS(_lid,_ses);
+	}
+	
+	@GET
+	@Path("/G")
+	@Produces(MediaType.TEXT_HTML)
+	public String GLA_GET
+	(
+			@QueryParam("LID") String _lid, 
+			@QueryParam("S") String _ses
+	)
+	{
+		return  GET_ALL_ANALYTICS(_lid,_ses);
+	}
+	
+	
+	public String GET_ALL_ANALYTICS
+	(
+			 String _lid, 
+			 String _ses
+	)
 	{
     	
     	try
@@ -142,16 +151,18 @@ public class GLA {
 				      JSONObject _jo = new JSONObject();
 			    	  sql = "SELECT LINK_ID, DATE FROM LINK_ANALYTICS WHERE LINK_ID="+_ilid+"";
 				      rs = stmt.executeQuery(sql);
-				      
+				      String _last_access = "";
 				      while(rs.next())
 				      {
 				    	  _total_count++;
 				    	  _jo = new JSONObject();
-				    	  _jo.put("CLICK_DATE", rs.getString("DATE"));
+				    	  _last_access = rs.getString("DATE");
+				    	  _jo.put("CLICK_DATE",_last_access);
 				    	  _ja.add(_jo);
 				    	 
 				      }
 				      _jo_result.put("TOTAL_CLICK_COUNT",_total_count);
+				      _jo_result.put("LAST_ACCESS", _last_access);
 				      _jo_result.put("CLICK_DATES",_ja);
 				      _jo_result.put("RESULT",1);
 				  }
